@@ -4,7 +4,7 @@ set -e -u
 
 set -o pipefail
 
-resource_dir=/opt/resource
+resource_dir=${resource_dir:-/opt/resource}
 
 run() {
   export TMPDIR=$(mktemp -d ${TMPDIR_ROOT}/git-tests.XXXXXX)
