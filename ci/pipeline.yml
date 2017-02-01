@@ -1,0 +1,36 @@
+---
+jobs:
+- name: semver-resource
+  serial: true
+  public: false # easy to leak bucket params
+  plan:
+  - get: semver-resource
+    trigger: true
+  - task: unit
+    file: semver-resource/build.yml
+    params:
+      # Note: the test scripts invoked here just create an object at root of
+      # bucket, named by some random UUID.
+      SEMVER_TESTING_ACCESS_KEY_ID: {{semver-access-key}}
+      SEMVER_TESTING_SECRET_ACCESS_KEY: {{semver-secret-key}}
+      SEMVER_TESTING_BUCKET: {{semver-bucket}}
+      SEMVER_TESTING_REGION: {{semver-region}}
+  - put: semver-resource-image
+    params:
+      build: built-resource
+    get_params: { rootfs: true }
+
+resources:
+- name: semver-resource
+  type: git
+  source:
+    uri: https://github.com/gstackio/semver-resource.git
+    branch: git-skip-ssl-verif
+
+- name: semver-resource-image
+  type: docker-image
+  source:
+    username: {{docker-username}}
+    email: {{docker-email}}
+    password: {{docker-password}}
+    repository: gstack/semver-resource
